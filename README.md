@@ -54,3 +54,4 @@ Monix
 * [Overview](https://www.slant.co/topics/2349/~functional-reactive-programming-frp-libraries-for-haskell) of Haskell FRP libraries
 * [frp-zoo](https://github.com/gelisam/frp-zoo): Several implementation of a simple program with different FRP libraries
 * Controlling time and space: understanding the many formulations of FRP: [presentaton](https://www.youtube.com/watch?v=Agu6jipKfYw)
+* A Scala FRP library [Sodium](https://github.com/SodiumFRP/sodium/tree/master/scala)
