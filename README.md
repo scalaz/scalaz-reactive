@@ -46,6 +46,7 @@ scala.rx
 Sodium
  - purely functional [x]
  - signals [x]
+ 
 Monix
  - purely functional [x]
  - signals []
