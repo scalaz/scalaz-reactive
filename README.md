@@ -41,17 +41,22 @@ Scala.js and DOM manupulation are out of scope for this project.
 
 scala.rx
  - purely functional []
+ - signals []
 
-
+Sodium
+ - purely functional [x]
+ - signals [x]
 Monix
  - purely functional [x]
+ - signals []
 
 
 
 # Background
-* Haskell [Functional Reactive Programming](https://wiki.haskell.org/FRP)
+* _Functional Reactive Programming_ by Stephen Blackheath and Anthony Jones, Manning Publications
 * Conal Elliot's [Denotational Semantics](http://conal.net/papers/push-pull-frp/) paper
+* Haskell [Functional Reactive Programming](https://wiki.haskell.org/FRP)
 * [Overview](https://www.slant.co/topics/2349/~functional-reactive-programming-frp-libraries-for-haskell) of Haskell FRP libraries
 * [frp-zoo](https://github.com/gelisam/frp-zoo): Several implementation of a simple program with different FRP libraries
-* Controlling time and space: understanding the many formulations of FRP: [presentaton](https://www.youtube.com/watch?v=Agu6jipKfYw)
-* A Scala FRP library [Sodium](https://github.com/SodiumFRP/sodium/tree/master/scala)
+* [Controlling time and space: understanding the many formulations of FRP](https://www.youtube.com/watch?v=Agu6jipKfYw) presentation based on ELM
+* A Scala FRP library [Sodium](https://github.com/SodiumFRP)
