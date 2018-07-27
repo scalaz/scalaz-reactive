@@ -1,7 +1,15 @@
 package scalaz.reactive
 
 
+/**
+  * Stream of events
+  */
 trait Event[A]
+
+/**
+  * Value changin in time, aka behavior
+  */
+
 
 trait Signal[A]
 
@@ -32,9 +40,6 @@ object Ops {
     def accumS(initial: A) = L.accumS(initial, e)
   }
 
-  implicit class SignalOps[F[_], A](s: Signal[A])(implicit L: Frp[F]) {
-
-  }
 
 }
 
