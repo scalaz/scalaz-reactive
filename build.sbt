@@ -4,6 +4,14 @@ organization in ThisBuild := "org.scalaz"
 
 version in ThisBuild := "0.1.0-SNAPSHOT"
 
+resolvers in ThisBuild +=
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+
+libraryDependencies in ThisBuild ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.2.25",
+  "org.scalaz" %% "scalaz-zio"  % "0.1-SNAPSHOT"
+)
+
 publishTo in ThisBuild := {
   val nexus = "https://oss.sonatype.org/"
   if (isSnapshot.value)
