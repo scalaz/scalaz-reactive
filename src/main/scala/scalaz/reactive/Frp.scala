@@ -6,19 +6,19 @@ package scalaz.reactive
 trait Event[A]
 
 /**
- * Value changin in time, aka behavior
+ * Value changing in time, aka behavior
  */
-trait Signal[A]
+trait Behavior[A]
 
 trait Frp[F[_]] {
 
   type Time = Int
 
-  def stepper[A](initial: A, event: Event[A]): Signal[A]
+  def stepper[A](initial: A, event: Event[A]): Behavior[A]
 
-  def accumS[A](initial: A, event: Event[A => A]): Signal[A]
+  def accumS[A](initial: A, event: Event[A => A]): Behavior[A]
 
-  def signal[A](f: Time => A): Signal[A]
+  def signal[A](f: Time => A): Behavior[A]
 
   def filterE[A](event: Event[A], f: A => Boolean): Event[A]
 

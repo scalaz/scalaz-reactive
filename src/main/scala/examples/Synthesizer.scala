@@ -36,9 +36,9 @@ object Synthesizer {
     eKey: Event[Char]
   )(implicit
     functorEvent: Functor[Event],
-    applicativeSignal: Applicative[Signal],
+    applicativeSignal: Applicative[Behavior],
     L: Frp[F]
-  ): Signal[Note] = {
+  ): Behavior[Note] = {
 
     // TODO: flatten
     val ePitch: Event[Pitch] = eKey.map(e => table.get(e)).filter(_.isDefined).map(_.get)
@@ -50,8 +50,8 @@ object Synthesizer {
     }
 
     // TODO: flatten
-    val bOctave: Signal[Octave] = eKey.map(eOctChange).filter(_.isDefined).map(_.get).accumS(0)
-    val bPitch: Signal[Pitch]   = ePitch.stepper(PC)
+    val bOctave: Behavior[Octave] = eKey.map(eOctChange).filter(_.isDefined).map(_.get).accumS(0)
+    val bPitch: Behavior[Pitch]   = ePitch.stepper(PC)
 
     (bOctave |@| bPitch).apply(Note(_, _))
 
