@@ -1,17 +1,21 @@
 package scalaz.reactive
 
 import scalaz.Order
-import scalaz.Ordering.{LT, EQ, GT}
+import scalaz.Ordering.{EQ, GT, LT}
+import scalaz.reactive.Time.{NegInf, PosInf, T}
 
 sealed trait Time
 
-object Time {
+object Time extends TimeInstances0 {
 
   case object NegInf extends Time
 
   case class T(value: Long) extends Time
 
   case object PosInf extends Time
+}
+
+trait TimeInstances0 {
 
   implicit val orderTime: Order[Time] =
     (x: Time, y: Time) => (x, y) match {
