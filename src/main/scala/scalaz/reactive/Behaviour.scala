@@ -11,13 +11,13 @@ case class Behaviour[+A](value: Reactive[TimeFun[A]]) extends AnyVal {
     Behaviour.applicativeBehaviour.ap(this)(f)
 }
 
-object Behaviour extends BehaviourInstances0 {
+object Behaviour extends BehaviourInstances {
 
   def point[A](a: => A): Behaviour[A] =
     applicativeBehaviour.point(a)
 }
 
-trait BehaviourInstances0 extends BehaviourInstances1 {
+trait BehaviourInstances extends TimeFunInstances {
 
   val reactiveTimeFunFunctor =
     Functor[Reactive].compose(Functor[TimeFun])
@@ -28,9 +28,8 @@ trait BehaviourInstances0 extends BehaviourInstances1 {
       override def map[A, B](fa: Behaviour[A])(f: A => B): Behaviour[B] =
         Behaviour(reactiveTimeFunFunctor.map(fa.value)(f))
     }
-}
 
-trait BehaviourInstances1 {
+  val timeFunApplicative = Applicative[TimeFun]
 
   val reactiveTimeFunApplicative =
     Applicative[Reactive].compose(Applicative[TimeFun])

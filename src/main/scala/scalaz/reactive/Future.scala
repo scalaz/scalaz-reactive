@@ -27,9 +27,6 @@ object Future extends FutureInstances0 {
   def point[A](a: => A): Future[A] =
     Future(() => NegInf, () => a)
 
-  def apply[A](time: => Time, a: => A): Future[A] =
-    Future[A](() => time, () => a)
-
   def apply[A](force: => (Time, A)): Future[A] =
     Future[A](() => force._1, () => force._2)
 

@@ -24,13 +24,13 @@ case class Reactive[+A](head: A, tail: Event[A]) {
   }
 }
 
-object Reactive extends ReactiveInstances0 {
+object Reactive extends ReactiveInstances {
 
   def point[A](a: => A): Reactive[A] =
     Reactive(a, Event(Future.Never))
 }
 
-trait ReactiveInstances0 extends ReactiveInstances1 {
+trait ReactiveInstances {
 
   implicit def functorReactive: Functor[Reactive] =
     new Functor[Reactive] {
@@ -38,9 +38,6 @@ trait ReactiveInstances0 extends ReactiveInstances1 {
       override def map[A, B](fa: Reactive[A])(f: A => B): Reactive[B] =
         fa.map(f)
     }
-}
-
-trait ReactiveInstances1 extends ReactiveInstances2 {
 
   implicit def applicativeReactive: Applicative[Reactive] =
     new Applicative[Reactive] {
@@ -50,9 +47,6 @@ trait ReactiveInstances1 extends ReactiveInstances2 {
       override def ap[A, B](fa: => Reactive[A])(f: => Reactive[A => B]): Reactive[B] =
         fa.ap(f)
     }
-}
-
-trait ReactiveInstances2 {
 
   implicit def monadReactive: Monad[Reactive] =
     new Monad[Reactive] {
