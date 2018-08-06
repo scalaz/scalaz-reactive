@@ -1,19 +1,22 @@
 package scalaz.reactive
 
 import scalaz.Scalaz._
-import scalaz.reactive.Time.{NegInf, PosInf}
-import scalaz.{Applicative, Functor, Monad, Monoid}
+import scalaz.reactive.Time.{ NegInf, PosInf }
+import scalaz.{ Applicative, Functor, Monad, Monoid }
 
 case class Future[+A](time: () => Time, force: () => A) {
 
   def + [AA >: A](other: Future[AA]): Future[AA] =
-    Future(() => time() min other.time(), () => if(time() <= other.time()) force() else other.force())
+    Future(
+      () => time().min(other.time()),
+      () => if (time() <= other.time()) force() else other.force()
+    )
 
   def map[B](f: A => B): Future[B] =
     Future(() => time(), () => f(force()))
 
   def ap[B](f: => Future[A => B]): Future[B] =
-    Future(() => time() max f.time(), () => f.force()(force()))
+    Future(() => time().max(f.time()), () => f.force()(force()))
 
   def flatMap[B](f: A => Future[B]): Future[B] =
     f(force())
@@ -23,9 +26,6 @@ object Future extends FutureInstances0 {
 
   def point[A](a: => A): Future[A] =
     Future(() => NegInf, () => a)
-
-  def apply[A](time: => Time, a: => A): Future[A] =
-    Future[A](() => time, () => a)
 
   def apply[A](force: => (Time, A)): Future[A] =
     Future[A](() => force._1, () => force._2)
