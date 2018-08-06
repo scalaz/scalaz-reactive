@@ -1,6 +1,6 @@
 package scalaz.reactive
 
-import scalaz.{Applicative, Functor, Monad}
+import scalaz.{ Applicative, Functor, Monad }
 
 case class Reactive[+A](head: A, tail: Event[A]) {
 
@@ -8,10 +8,16 @@ case class Reactive[+A](head: A, tail: Event[A]) {
     Reactive(f(head), tail.map(f))
 
   def ap[B](f: Reactive[A => B]): Reactive[B] =
-    Reactive(f.head(head), Event(f.tail.value.map((f0: Reactive[A => B]) => ap(f0)) + tail.value.map((fa: Reactive[A]) => fa.ap(f))))
+    Reactive(
+      f.head(head),
+      Event(
+        f.tail.value.map((f0: Reactive[A => B]) => ap(f0)) + tail.value
+          .map((fa: Reactive[A]) => fa.ap(f))
+      )
+    )
 
   def flatMap[B](f: A => Reactive[B]): Reactive[B] = {
-    val other = f(head)
+    val other                      = f(head)
     val tail1: Future[Reactive[B]] = other.tail.value
     val tail2: Future[Reactive[B]] = tail.value.flatMap(r => f(r.head).tail.value)
     Reactive(other.head, Event(tail1 + tail2))

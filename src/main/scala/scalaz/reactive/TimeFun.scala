@@ -1,7 +1,7 @@
 package scalaz.reactive
 
-import scalaz.{Applicative, Functor, Monad}
-import scalaz.reactive.TimeFun.{Fun, K}
+import scalaz.{ Applicative, Functor, Monad }
+import scalaz.reactive.TimeFun.{ Fun, K }
 
 sealed trait TimeFun[+A] {
 
@@ -9,19 +9,19 @@ sealed trait TimeFun[+A] {
 
   def map[B](f: A => B): TimeFun[B] =
     this match {
-      case K(a) => K(f(a))
-      case Fun(g) => Fun(f compose g)
+      case K(a)   => K(f(a))
+      case Fun(g) => Fun(f.compose(g))
     }
 
   def ap[B](f: TimeFun[A => B]): TimeFun[B] =
     (f, this) match {
       case (K(g), K(a)) => K(g(a))
-      case (Fun(g), h) => Fun(t => g(t)(h.apply(t)))
+      case (Fun(g), h)  => Fun(t => g(t)(h.apply(t)))
     }
 
   def flatMap[B](f: A => TimeFun[B]): TimeFun[B] =
     this match {
-      case K(a) => f(a)
+      case K(a)   => f(a)
       case Fun(g) => Fun(t => f(g(t)).apply(t))
     }
 }

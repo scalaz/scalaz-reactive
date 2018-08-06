@@ -1,6 +1,6 @@
 package scalaz.reactive
 
-import scalaz.{Applicative, Functor}
+import scalaz.{ Applicative, Functor }
 
 case class Behaviour[+A](value: Reactive[TimeFun[A]]) extends AnyVal {
 
