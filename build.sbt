@@ -35,5 +35,6 @@ addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
 lazy val root =
   (project in file("."))
     .settings(
-      stdSettings("reactive")
+      stdSettings("reactive"),
+      libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.25"
     )
