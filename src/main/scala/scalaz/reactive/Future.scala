@@ -1,9 +1,9 @@
 package scalaz.reactive
 
 import scalaz.Scalaz._
-import scalaz.reactive.Time.{NegInf, PosInf}
+import scalaz.reactive.Time.{ NegInf, PosInf }
 import scalaz.zio.IO
-import scalaz.{Applicative, Functor, Monad, Monoid}
+import scalaz.{ Applicative, Functor, Monad, Monoid }
 
 object Types {
   type Infallible[A] = IO[Nothing, A]
@@ -11,7 +11,7 @@ object Types {
 
 case class Future[+A](force: IO[Nothing, (Time, A)]) {
 
-  def +[AA >: A](other: Future[AA]): Future[AA] =
+  def + [AA >: A](other: Future[AA]): Future[AA] =
     Future(force.flatMap {
       case (t1, a1) =>
         other.force.map {
@@ -29,9 +29,8 @@ case class Future[+A](force: IO[Nothing, (Time, A)]) {
           .map { case (t2, f) => (t2.max(t), f(a)) } // There should be IO.ap, is there?
     })
 
-  def flatMap[B](f: A => Future[B]): Future[B] = {
+  def flatMap[B](f: A => Future[B]): Future[B] =
     Future(force.flatMap { case (_, a) => f(a).force }) // FIXME - what to do with the times
-  }
 }
 
 object Future extends FutureInstances0 {
@@ -85,8 +84,7 @@ trait FutureInstances2 {
       override def point[A](a: => A): Future[A] =
         Future.point(a)
 
-      override def bind[A, B](fa: Future[A])(f: A => Future[B]): Future[B] = {
+      override def bind[A, B](fa: Future[A])(f: A => Future[B]): Future[B] =
         Future(fa.force.flatMap { case (_, a) => f(a).force })
-      }
     }
 }
