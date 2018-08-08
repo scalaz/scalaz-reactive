@@ -27,5 +27,6 @@ trait TimeInstances0 {
         case (_, PosInf)               => LT
         case (T(xt), T(yt)) if xt < yt => LT
         case (T(xt), T(yt)) if xt > yt => GT
+        case (T(_), T(_))              => EQ
       }
 }

@@ -1,10 +1,10 @@
 package scalaz.reactive
 import scalaz.Monoid
-import scalaz.zio.IO
+import scalaz.zio.{IO, RTS}
 
-case class Event[A](value: Future[Reactive[A]]) extends AnyVal { self =>
+case class Event[A](value: Future[Reactive[A]]) extends  RTS { self =>
 
-  def merge(v: Event[A]): Event[A] = {
+  def merge(v: Event[A]): Event[A] = { // if Event[+A]: covariant type A occurs in contravariant position
 
     val winner: IO[Nothing, Either[(Time, Reactive[A]), (Time, Reactive[A])]] =
       self.value.force.map(Left(_)).race(v.value.force.map(Right(_)))
@@ -15,8 +15,8 @@ case class Event[A](value: Future[Reactive[A]]) extends AnyVal { self =>
       case Right((t, r)) =>
          Future((t, Reactive(r.head, r.tail)))
     })
-    // FIXME - how to proceed ???
-    ???
+
+    Event(unsafeRun(io)) // That is not good
   }
 
   def map[B](f: A => B): Event[B] =

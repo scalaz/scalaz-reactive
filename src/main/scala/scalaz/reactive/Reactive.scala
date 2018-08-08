@@ -2,7 +2,7 @@ package scalaz.reactive
 
 import scalaz.{ Applicative, Functor, Monad }
 
-case class Reactive[+A](head: A, tail: Event[A]) {
+case class Reactive[A](head: A, tail: Event[A]) {
 
   def map[B](f: A => B): Reactive[B] =
     Reactive(f(head), tail.map(f))

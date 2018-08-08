@@ -2,7 +2,7 @@ package scalaz.reactive
 
 import scalaz.{ Applicative, Functor }
 
-case class Behaviour[+A](value: Reactive[TimeFun[A]]) extends AnyVal {
+case class Behaviour[A](value: Reactive[TimeFun[A]]) extends AnyVal {
 
   def map[B](f: A => B): Behaviour[B] =
     Behaviour.functorBehaviour.map(this)(f)
