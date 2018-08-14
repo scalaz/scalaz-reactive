@@ -1,26 +1,25 @@
 package scalaz.reactive
 
 import scalaz.{ Applicative, Functor, Monad }
+import Future._
 
-case class Reactive[A](head: A, tail: Event[A]) {
+case class Reactive[+A](head: A, tail: Event[A]) {
 
   def map[B](f: A => B): Reactive[B] =
     Reactive(f(head), tail.map(f))
 
-  def ap[B](f: Reactive[A => B]): Reactive[B] =
-    Reactive(
-      f.head(head),
-      Event(
-        f.tail.value.map((f0: Reactive[A => B]) => ap(f0)) + tail.value
-          .map((fa: Reactive[A]) => fa.ap(f))
-      )
-    )
+  def ap[B](f: Reactive[A => B]): Reactive[B] = ??? // 7.1.2: Applicative is more challenging. :-(
 
+  /* 5.2
+   rat (r >>= k) = rat r >>= rat ◦ k
+    = λt → (rat ◦ k) (rat r t) t
+    = λt → rat (k (rat r t)) t
+  **/
   def flatMap[B](f: A => Reactive[B]): Reactive[B] = {
-    val other                      = f(head)
-    val tail1: Future[Reactive[B]] = other.tail.value
-    val tail2: Future[Reactive[B]] = tail.value.flatMap(r => f(r.head).tail.value)
-    Reactive(other.head, Event(tail1 + tail2))
+    val other: Reactive[B]             = f(head)
+    val otherTail: Future[Reactive[B]] = other.tail.value
+    val thisTail: Future[Reactive[B]]  = tail.value.flatMap { case (_, r) => f(r.head).tail.value }
+    Reactive(other.head, Event(Future.merge(thisTail, otherTail)))
   }
 }
 
