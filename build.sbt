@@ -1,13 +1,16 @@
 import Scalaz._
 
-organization in ThisBuild := "org.scalaz"
+lazy val commonSettings = Seq(
+  organization := "org.scalaz",
+  version := "0.1.0-SNAPSHOT",
+  resolvers  +=
+    "Sonatype OSS Snapshots".at("https://oss.sonatype.org/content/repositories/snapshots")
 
-version in ThisBuild := "0.1.0-SNAPSHOT"
+)
 
-resolvers in ThisBuild +=
-  "Sonatype OSS Snapshots".at("https://oss.sonatype.org/content/repositories/snapshots")
 
-libraryDependencies in ThisBuild ++= Seq(
+
+val dependencies = Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.25",
   "org.scalaz" %% "scalaz-zio"  % "0.1-SNAPSHOT"
 )
@@ -32,8 +35,19 @@ credentials in ThisBuild ++= sonataCredentials.toSeq
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
 
-lazy val root =
-  (project in file("."))
+lazy val core =
+  (project in file("core"))
     .settings(
-      stdSettings("reactive")
+      commonSettings ++
+      stdSettings("reactive"),
+      libraryDependencies ++= dependencies
     )
+
+lazy val examples = (project in file("examples"))
+  .settings(
+    commonSettings ++
+    stdSettings("examples")
+  )
+  .dependsOn(
+    core
+  )
