@@ -1,7 +1,6 @@
 package scalaz.reactive.examples
 
-import scalaz.reactive.Future.Future
-import scalaz.reactive.{ Event, Reactive, Time }
+import scalaz.reactive._
 import scalaz.zio.{ App, IO }
 
 import scala.concurrent.duration._
@@ -12,19 +11,13 @@ object TwoTickers extends App {
   def run(args: List[String]): IO[Nothing, ExitStatus] =
     myAppLogic.attempt.map(_.fold(_ => 1, _ => 0)).map(ExitStatus.ExitNow(_))
 
-  trait Tick
-  object Tick extends Tick
+  case class Tick(value: String)
 
-  def tick: Future[Tick] = IO.now(Tick).delay(1 second).map(t => (Time(), t))
+  def ticks(interval: Duration, name: String): Event[Tick] =
+    Event(IO.point { (Time(), Reactive(Tick(name), ticks(interval, name))) }.delay(interval))
 
-  def reactiveTicks(): IO[Void, (Time, Reactive[Tick])] =
-    IO.point {
-        (Time(), Reactive(Tick, ticks()))
-      }
-      .delay(1 second)
-
-  def ticks(): Event[Tick] = Event(reactiveTicks())
-
-  def myAppLogic = scalaz.reactive.Sink[Tick, Unit](_ => IO.now(println("tick"))).sink(ticks())
+  def myAppLogic =
+    Sink[Tick, Unit](t => IO.now(println(s"tick ${t.value}")))
+      .sink(ticks(1 second, "a").merge(ticks(0.5 second, "b")))
 
 }
