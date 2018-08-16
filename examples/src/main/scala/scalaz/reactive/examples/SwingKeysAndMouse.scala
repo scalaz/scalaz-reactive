@@ -20,6 +20,9 @@ import scalaz.zio.console._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+/**
+  * Ignore this
+  */
 object KeyboardAndTime extends App {
 
   def run(args: List[String]): IO[Nothing, ExitStatus] =

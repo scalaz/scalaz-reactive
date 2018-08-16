@@ -17,12 +17,15 @@ object TwoTickers extends App {
 
   def tick: Future[Tick] = IO.now(Tick).delay(1 second).map(t => (Time(), t))
 
-  def reactiveTicks: IO[Void, (Time, Reactive[Tick])] = tick.map {
-    case (t, head) => (t, Reactive(head, ticks()))
-  }
+  def reactiveTicks(): IO[Void, (Time, Reactive[Tick])] =
+    IO.point {
+        println("tick")
+        (Time(), Reactive(Tick, ticks()))
+      }
+      .delay(1 second)
 
-  def ticks(): Event[Tick] = Event(reactiveTicks)
+  def ticks(): Event[Tick] = Event(reactiveTicks())
 
-  def myAppLogic  = ticks.value
+  def myAppLogic = scalaz.reactive.Sink[Tick, Unit]( _ => IO.point(println("tick"))).sink(ticks())
 
 }
