@@ -19,13 +19,12 @@ object TwoTickers extends App {
 
   def reactiveTicks(): IO[Void, (Time, Reactive[Tick])] =
     IO.point {
-        println("tick1")
         (Time(), Reactive(Tick, ticks()))
       }
       .delay(1 second)
 
   def ticks(): Event[Tick] = Event(reactiveTicks())
 
-  def myAppLogic = scalaz.reactive.Sink[Tick, Unit](_ => IO.point(println("tick2"))).sink(ticks())
+  def myAppLogic = scalaz.reactive.Sink[Tick, Unit](_ => IO.now(println("tick"))).sink(ticks())
 
 }
