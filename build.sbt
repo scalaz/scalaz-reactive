@@ -3,12 +3,9 @@ import Scalaz._
 lazy val commonSettings = Seq(
   organization := "org.scalaz",
   version := "0.1.0-SNAPSHOT",
-  resolvers  +=
+  resolvers +=
     "Sonatype OSS Snapshots".at("https://oss.sonatype.org/content/repositories/snapshots")
-
 )
-
-
 
 val dependencies = Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.25",
@@ -39,14 +36,14 @@ lazy val core =
   (project in file("core"))
     .settings(
       commonSettings ++
-      stdSettings("reactive"),
+        stdSettings("reactive"),
       libraryDependencies ++= dependencies
     )
 
 lazy val examples = (project in file("examples"))
   .settings(
     commonSettings ++
-    stdSettings("examples")
+      stdSettings("examples")
   )
   .dependsOn(
     core
