@@ -5,8 +5,8 @@ import scalaz.zio.IO
 
 object Future {
 
-  type Infallible[A]      = IO[Nothing, A]
-  type Future[+A]         = IO[Void, (Time, A)]
+  type Infallible[A] = IO[Nothing, A]
+  type Future[+A]    = IO[Void, (Time, A)]
   def Never[A]: Future[A] = IO.never
 
   def merge[A](f1: Future[A], f2: Future[A]): Future[A] = f1.flatMap {

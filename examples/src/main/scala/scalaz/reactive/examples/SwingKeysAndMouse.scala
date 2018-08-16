@@ -13,16 +13,16 @@ import javax.swing.JTextArea
 import javax.swing.JTextField
 import javax.swing.SwingUtilities._
 import scalaz.reactive.Future.Future
-import scalaz.reactive.{Reactive, Time}
-import scalaz.zio.{App, IO, Queue}
+import scalaz.reactive.{ Reactive, Time }
+import scalaz.zio.{ App, IO, Queue }
 import scalaz.zio.console._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 /**
-  * Ignore this
-  */
+ * Ignore this
+ */
 object KeyboardAndTime extends App {
 
   def run(args: List[String]): IO[Nothing, ExitStatus] =
@@ -31,11 +31,11 @@ object KeyboardAndTime extends App {
   def myAppLogic: IO[IOException, Unit] =
     for {
       _ <- IO.point {
-        invokeLater(() => {
-          new KeyEventDemo("KeyEventDemo")
-          ()
-        })
-      }
+            invokeLater(() => {
+              new KeyEventDemo("KeyEventDemo")
+              ()
+            })
+          }
       - <- putStrLn("Started")
       - <- IO.sleep(10 days) // Swing onExit exits the program
       - <- putStrLn("Finished")
@@ -54,11 +54,12 @@ class KeyEventDemo(val name: String)
   //Display the window.
 
   val displayArea = new JTextArea
-  val typingArea = new JTextField(20)
+  val typingArea  = new JTextField(20)
   addComponentsToPane
   pack
   displayArea.addMouseListener(this)
   setVisible(true)
+
   def addComponentsToPane(): Unit = {
     val button = new JButton("Clear")
     button.addActionListener(this)
@@ -77,14 +78,15 @@ class KeyEventDemo(val name: String)
 
 //  def keyPressed(e: KeyEvent) = displayArea.append(e.getKeyChar.toString)
   val keyEvents: IO[Nothing, Queue[KeyEvent]] = Queue.unbounded[KeyEvent]
-  def keyPressed(e: KeyEvent) = () // keyEvents.map { q => {q.offer(e)}}
+  def keyPressed(e: KeyEvent)                 = () // keyEvents.map { q => {q.offer(e)}}
 
   def keyReleased(e: KeyEvent): Unit = ()
 
   val futureEvent: Future[KeyEvent] =
-    keyEvents.flatMap(_.take).map { e => (Time(), e)
+    keyEvents.flatMap(_.take).map { e =>
+      (Time(), e)
     }
-  val eventKey = scalaz.reactive.Event(futureReactive)
+  val eventKey                                   = scalaz.reactive.Event(futureReactive)
   def futureReactive: Future[Reactive[KeyEvent]] = ???
 
   /** Handle the button click. */
@@ -99,6 +101,6 @@ class KeyEventDemo(val name: String)
   override def mousePressed(e: MouseEvent): Unit =
     displayArea.append(s"[${e.getX},${e.getY}]")
   override def mouseReleased(e: MouseEvent): Unit = ()
-  override def mouseEntered(e: MouseEvent): Unit = ()
-  override def mouseExited(e: MouseEvent): Unit = ()
+  override def mouseEntered(e: MouseEvent): Unit  = ()
+  override def mouseExited(e: MouseEvent): Unit   = ()
 }

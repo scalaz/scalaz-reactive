@@ -1,8 +1,8 @@
 package scalaz.reactive.examples
 
 import scalaz.reactive.Future.Future
-import scalaz.reactive.{Event, Reactive, Time}
-import scalaz.zio.{App, IO}
+import scalaz.reactive.{ Event, Reactive, Time }
+import scalaz.zio.{ App, IO }
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -26,6 +26,6 @@ object TwoTickers extends App {
 
   def ticks(): Event[Tick] = Event(reactiveTicks())
 
-  def myAppLogic = scalaz.reactive.Sink[Tick, Unit]( _ => IO.point(println("tick"))).sink(ticks())
+  def myAppLogic = scalaz.reactive.Sink[Tick, Unit](_ => IO.point(println("tick"))).sink(ticks())
 
 }
