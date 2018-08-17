@@ -16,9 +16,14 @@ composing dynamic values changing in continuous time and reacting to discrete ev
 
 # Core concepts
 
+`Behaviour[A](value: Reactive[TimeFun[A]])` - value chaninging over time.
+
 `Event[+A](value: Future[Reactive[A]])` - stream of (Time, a) pairs.
-`Reactive[+A](head: A, tail: Event[A])` - reactive value
-`Sink[A, B](f: A => IO[Void, Unit])` - Consumer of Reactive Values
+
+`Reactive[+A](head: A, tail: Event[A])` - reactive value.
+
+`Sink[A, B](f: A => IO[Void, Unit])` - consumer of reactive values.
+
 
 # Example
 
@@ -36,7 +41,7 @@ case class Tick(name: String)
       )
 ```
 
-This program produces a `scalaz.zio.IO` tha can be run by e.g. `scalaz.zio.App`.
+This program produces a `scalaz.zio.IO` that can be run by e.g. `scalaz.zio.App` - see `TwoTickers.scala` in `examples`.
 
 # Background
 
