@@ -12,7 +12,7 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
 
     case class Outcome(value: (Time, Reactive[AA]), loser: Fiber[Void, (Time, Reactive[AA])])
 
-    val futureReactive: IO[Void, (Time, Reactive[AA])] = value
+    val futureReactive: IO[Void, (Time, Reactive[AA])] = self.value
       .raceWith(v.value)(
         (a, f) => IO.now(Outcome(a, f)),
         (a, f) => IO.now(Outcome(a, f))
