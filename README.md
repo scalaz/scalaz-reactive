@@ -27,6 +27,8 @@ composing dynamic values changing in continuous time and reacting to discrete ev
 
 # Example
 
+This project is just starting, so the working example is quite simple:
+
 ```
 case class Tick(name: String)
 
