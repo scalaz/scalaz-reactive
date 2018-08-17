@@ -1,7 +1,7 @@
 package scalaz.reactive.examples
 
 import scalaz.reactive._
-import scalaz.zio.{ App, IO }
+import scalaz.zio.{App, IO}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -14,10 +14,16 @@ object TwoTickers extends App {
   case class Tick(value: String)
 
   def ticks(interval: Duration, name: String): Event[Tick] =
-    Event(IO.point { (Time(), Reactive(Tick(name), ticks(interval, name))) }.delay(interval))
+    Event(
+      IO.point { (Time.now, Reactive(Tick(name), ticks(interval, name))) }
+        .delay(interval)
+    )
 
   def myAppLogic =
     Sink[Tick, Unit](t => IO.now(println(s"tick ${t.value}")))
-      .sink(ticks(1 second, "a").merge(ticks(0.5 second, "b")))
+      .sink(
+        ticks(1 second, "a")
+          .merge(ticks(1.5 second, "b"))
+      )
 
 }

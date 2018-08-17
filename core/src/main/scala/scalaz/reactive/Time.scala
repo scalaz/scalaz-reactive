@@ -14,7 +14,7 @@ object Time extends TimeInstances0 {
 
   case object PosInf extends Time
 
-  def apply() = T(System.currentTimeMillis())
+  def now = T(System.currentTimeMillis())
 }
 
 trait TimeInstances0 {

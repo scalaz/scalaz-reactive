@@ -84,7 +84,7 @@ class KeyEventDemo(val name: String)
 
   val futureEvent: Future[KeyEvent] =
     keyEvents.flatMap(_.take).map { e =>
-      (Time(), e)
+      (Time.now, e)
     }
   val eventKey                                   = scalaz.reactive.Event(futureReactive)
   def futureReactive: Future[Reactive[KeyEvent]] = ???
