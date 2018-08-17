@@ -1,36 +1,29 @@
 package scalaz.reactive
 import scalaz.Monoid
 import scalaz.reactive.Future._
-import scalaz.zio.Errors.LostRace
-import scalaz.zio.IO
+import scalaz.zio.{Fiber, IO}
+
+import scala.concurrent.duration.Duration
 
 case class Event[+A](value: Future[Reactive[A]]) { self =>
+  def delay(interval: Duration): Event[A] = Event(value.delay(interval))
 
   def merge[AA >: A](v: Event[AA]): Event[AA] = {
 
-    case class Outcome(
-      value: (Time, Reactive[AA]),
-      winner: Future[Reactive[AA]],
-      loser: Future[Reactive[AA]])
+    case class Outcome(value: (Time, Reactive[AA]),
+                       loser: Fiber[Void, (Time, Reactive[AA])])
 
-    val ioOutcome: IO[Void, Outcome] = value.raceWith(v.value)(
-      (a, fiber) =>
-        fiber
-          .interrupt(LostRace(Right(fiber)))
-          .const(Outcome(a, value, v.value)),
-      (a, fiber) => fiber.interrupt(LostRace(Left(fiber))).const(Outcome(a, v.value, value))
-    )
-    val futureReactive: IO[Void, (Time, Reactive[AA])] = ioOutcome.flatMap { outcome =>
-      val winEvent: Event[AA]   = Event(outcome.winner)
-      val looseEvent: Event[AA] = Event(outcome.loser)
-      val head: AA              = outcome.value._2.head
-      val winTail: IO[Void, Event[AA]] = winEvent.value.map {
-        case (_, r) => r.tail
-      }
+    val ioOutcome: IO[Void, Outcome] = value.raceWith(v.value)((a, f) => {
+      IO.now(Outcome(a, f))
+    }, (a, f) => {
+      IO.now(Outcome(a, f))
+    })
 
-      winTail.map { tailEvent =>
-        (outcome.value._1, Reactive(head, tailEvent.merge(looseEvent)))
-      }
+    val futureReactive: IO[Void, (Time, Reactive[AA])] = ioOutcome.map {
+      outcome =>
+        val head: AA = outcome.value._2.head
+        val winTail: Event[AA] = outcome.value._2.tail
+        (outcome.value._1, Reactive(head, winTail.merge(Event(outcome.loser.join))))
     }
     Event(futureReactive)
   }
