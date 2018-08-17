@@ -14,11 +14,9 @@ object TwoTickers extends App {
   case class Tick(name: String)
 
   def ticks(interval: Duration, name: String): Event[Tick] =
-    Event(
-      IO.point { (Time.now, Reactive(Tick(name), ticks(interval, name).delay(interval))) }
-    )
+    Event(IO.point { (Time.now, Reactive(Tick(name), ticks(interval, name).delay(interval))) })
 
-  def myAppLogic =
+  def myAppLogic: IO[Void, Unit] =
     Sink[Tick, Unit](t => IO.now(println(s"tick ${t.name}")))
       .sink(
         ticks(0.2 second, "a")
