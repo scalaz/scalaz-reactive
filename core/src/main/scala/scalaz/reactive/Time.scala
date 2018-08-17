@@ -13,6 +13,8 @@ object Time extends TimeInstances0 {
   case class T(value: Long) extends Time
 
   case object PosInf extends Time
+
+  def now = T(System.currentTimeMillis())
 }
 
 trait TimeInstances0 {
