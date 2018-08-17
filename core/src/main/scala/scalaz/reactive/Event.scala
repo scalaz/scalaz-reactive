@@ -7,35 +7,30 @@ import scalaz.zio.IO
 case class Event[+A](value: Future[Reactive[A]]) { self =>
 
   def merge[AA >: A](v: Event[AA]): Event[AA] = {
-    val selfv: IO[Void, (Time, Reactive[AA])] = value
-    val otherv: IO[Void, (Time, Reactive[AA])] = v.value
 
-    case class Outcome(value: (Time, Reactive[AA]),
-                       winner: Future[Reactive[AA]],
-                       loser: Future[Reactive[AA]])
-    val outcome: IO[Void, Outcome] = selfv.raceWith(v.value)(
+    case class Outcome(
+      value: (Time, Reactive[AA]),
+      winner: Future[Reactive[AA]],
+      loser: Future[Reactive[AA]])
+
+    val ioOutcome: IO[Void, Outcome] = value.raceWith(v.value)(
       (a, fiber) =>
         fiber
           .interrupt(LostRace(Right(fiber)))
-          .const(Outcome(a, selfv, otherv)),
-      (a, fiber) =>
-        fiber.interrupt(LostRace(Left(fiber))).const(Outcome(a, otherv, selfv))
+          .const(Outcome(a, value, v.value)),
+      (a, fiber) => fiber.interrupt(LostRace(Left(fiber))).const(Outcome(a, v.value, value))
     )
-    val futureReactive: IO[Void, (Time, Reactive[AA])] = outcome.flatMap {
-      outcome =>
-        val winEvent: Event[AA] = Event(outcome.winner)
-        val looseEvent: Event[AA] = Event(outcome.loser)
-        val head: AA = outcome.value._2.head
-        val tail: IO[Void, Event[AA]] = winEvent.value.map {
-          case (_, r) => r.tail
-        }
-        val r: Reactive[AA] = Reactive(head, winEvent.merge(looseEvent))
+    val futureReactive: IO[Void, (Time, Reactive[AA])] = ioOutcome.flatMap { outcome =>
+      val winEvent: Event[AA]   = Event(outcome.winner)
+      val looseEvent: Event[AA] = Event(outcome.loser)
+      val head: AA              = outcome.value._2.head
+      val winTail: IO[Void, Event[AA]] = winEvent.value.map {
+        case (_, r) => r.tail
+      }
 
-      val zz: IO[Void, (Time, Reactive[AA])] = tail.map{ tailEvent => {
-        val xx: Event[AA] = tailEvent.merge(looseEvent)
-        val r = Reactive( head, xx)
-        (outcome.value._1, r)
-      }}
+      winTail.map { tailEvent =>
+        (outcome.value._1, Reactive(head, tailEvent.merge(looseEvent)))
+      }
     }
     Event(futureReactive)
   }

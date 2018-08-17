@@ -1,7 +1,7 @@
 package scalaz.reactive.examples
 
 import scalaz.reactive._
-import scalaz.zio.{App, IO}
+import scalaz.zio.{ App, IO }
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
