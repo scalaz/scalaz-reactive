@@ -17,11 +17,11 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
         (a, f) => IO.now(Outcome(a, f)),
         (a, f) => IO.now(Outcome(a, f))
       )
-      .map { outcome =>
-        val result             = outcome.value
-        val head: AA           = result._2.head
-        val winTail: Event[AA] = result._2.tail
-        (result._1, Reactive(head, winTail.merge(Event(outcome.loser.join))))
+      .map {
+        case Outcome((time, reactive), loser) =>
+          val head: AA           = reactive.head
+          val winTail: Event[AA] = reactive.tail
+          (time, Reactive(head, winTail.merge(Event(loser.join))))
       }
     Event(futureReactive)
 
