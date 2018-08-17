@@ -1,7 +1,7 @@
 package scalaz.reactive
 import scalaz.Monoid
 import scalaz.reactive.Future._
-import scalaz.zio.{Fiber, IO}
+import scalaz.zio.{ Fiber, IO }
 
 import scala.concurrent.duration.Duration
 
@@ -10,8 +10,7 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
 
   def merge[AA >: A](v: Event[AA]): Event[AA] = {
 
-    case class Outcome(value: (Time, Reactive[AA]),
-                       loser: Fiber[Void, (Time, Reactive[AA])])
+    case class Outcome(value: (Time, Reactive[AA]), loser: Fiber[Void, (Time, Reactive[AA])])
 
     val ioOutcome: IO[Void, Outcome] = value.raceWith(v.value)((a, f) => {
       IO.now(Outcome(a, f))
@@ -19,11 +18,10 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
       IO.now(Outcome(a, f))
     })
 
-    val futureReactive: IO[Void, (Time, Reactive[AA])] = ioOutcome.map {
-      outcome =>
-        val head: AA = outcome.value._2.head
-        val winTail: Event[AA] = outcome.value._2.tail
-        (outcome.value._1, Reactive(head, winTail.merge(Event(outcome.loser.join))))
+    val futureReactive: IO[Void, (Time, Reactive[AA])] = ioOutcome.map { outcome =>
+      val head: AA           = outcome.value._2.head
+      val winTail: Event[AA] = outcome.value._2.tail
+      (outcome.value._1, Reactive(head, winTail.merge(Event(outcome.loser.join))))
     }
     Event(futureReactive)
   }
