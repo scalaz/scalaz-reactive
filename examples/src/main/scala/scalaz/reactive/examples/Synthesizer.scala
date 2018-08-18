@@ -1,11 +1,8 @@
 package scalaz.reactive.examples
 
 import scalaz.Scalaz._
-import scalaz._
 import scalaz.reactive._
 import scalaz.zio.{ App, IO }
-
-import scala.language.postfixOps
 
 /**
  * Example from https://wiki.haskell.org/FRP_explanation_using_reactive-banana
@@ -28,7 +25,7 @@ object Synthesizer extends App {
   val table = Map('a' -> PA, 'b' -> PB, 'g' -> PG)
 
   def build(eKey: Event[Char]): Behaviour[Note] = {
-    val ePitch = eKey
+    val ePitch: Event[Pitch] = eKey
       .map(table.get(_))
       .filter(_.isDefined)
       .map(_.get) // implement flatten, or filterSome
@@ -44,8 +41,16 @@ object Synthesizer extends App {
       .filter(_.isDefined)
       .map(_.get)
 
-    val bOctave: Behaviour[Octave] = Behaviour(Reactive(TimeFun.K(0), ???))
-    val bPitch: Behaviour[Pitch]   = Behaviour(Reactive(TimeFun.K(PA), ???))
+    val bOctave: Behaviour[Octave] = Behaviour(
+      Reactive(
+        TimeFun.K(0), //
+        eOctChange
+          .map(f => TimeFun.Fun(_ => f(0))) // wrong, we need to fold eOctChange functions over initial value
+      )
+    )
+    val bPitch: Behaviour[Pitch] = Behaviour(
+      Reactive(TimeFun.K(PA), ePitch.map(p => TimeFun.Fun(_ => p)))
+    )
 
     (bOctave |@| bPitch) { Note.apply _ }
   }
@@ -62,9 +67,7 @@ object Synthesizer extends App {
   def eKey(): Event[Char] =
     Event(IO.point { (Time.now, Reactive(randomChar, eKey())) }) // non FP here
 
-  def myAppLogic: IO[Void, Unit] = {
-    Sink[Note, Unit](n => IO.now(println(s"Note [${n.octave},${n.pitch}]")))
+  def myAppLogic: IO[Void, Unit] =
     ???
-  }
 
 }

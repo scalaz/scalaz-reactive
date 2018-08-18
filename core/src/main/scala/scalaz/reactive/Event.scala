@@ -34,7 +34,7 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
 
   def filter(f: A => Boolean): Event[A] =
     Event(value.flatMap {
-      case (t, r) => if (f(r.head)) IO.now(t, r) else r.tail.filter(f).value
+      case (t, r) => if (f(r.head)) IO.now((t, r)) else r.tail.filter(f).value
     })
 
   implicit def monoidEvent[E, A]: Monoid[Event[A]] =
