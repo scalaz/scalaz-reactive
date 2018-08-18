@@ -1,16 +1,11 @@
 package scalaz.reactive.examples
 
+import scalaz.Scalaz._
+import scalaz._
 import scalaz.reactive._
 import scalaz.zio.{ App, IO }
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
-import scalaz._
-import Scalaz._
-import scalaz.reactive.TimeFun.K
-import scalaz.reactive.examples.TwoTickers.{ Tick, ticks }
-
-import scala.util.Random
 
 /**
  * Example from https://wiki.haskell.org/FRP_explanation_using_reactive-banana

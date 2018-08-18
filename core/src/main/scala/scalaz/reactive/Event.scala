@@ -1,7 +1,7 @@
 package scalaz.reactive
 import scalaz.Monoid
 import scalaz.reactive.Future._
-import scalaz.zio.{Fiber, IO}
+import scalaz.zio.{ Fiber, IO }
 
 import scala.concurrent.duration.Duration
 
@@ -10,8 +10,7 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
 
   def merge[AA >: A](v: Event[AA]): Event[AA] = {
 
-    case class Outcome(value: (Time, Reactive[AA]),
-                       loser: Fiber[Void, (Time, Reactive[AA])])
+    case class Outcome(value: (Time, Reactive[AA]), loser: Fiber[Void, (Time, Reactive[AA])])
 
     val futureReactive: IO[Void, (Time, Reactive[AA])] = self.value
       .raceWith(v.value)(
@@ -20,7 +19,7 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
       )
       .map {
         case Outcome((time, reactive), loser) =>
-          val head: AA = reactive.head
+          val head: AA           = reactive.head
           val winTail: Event[AA] = reactive.tail
           (time, Reactive(head, winTail.merge(Event(loser.join))))
       }
@@ -31,13 +30,12 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
   def map[B](f: A => B): Event[B] =
     Event(value.map { case (t, r) => (t, r.map(f)) })
 
-  def flatMap[B](f: A => Event[B]) : Event[B] = ???
+  def flatMap[B](f: A => Event[B]): Event[B] = ???
 
   def filter(f: A => Boolean): Event[A] =
     Event(value.flatMap {
       case (t, r) => if (f(r.head)) IO.now(t, r) else r.tail.filter(f).value
     })
-
 
   implicit def monoidEvent[E, A]: Monoid[Event[A]] =
     new Monoid[Event[A]] {
