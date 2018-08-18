@@ -57,7 +57,7 @@ object Synthesizer extends App {
 
   def randomChar(lower: Char, upper: Char) =
     ((Math.random() * (upper - lower)).toInt + lower).toChar
-  def randomChar = randomChar(' ', 128)
+  def randomChar: Char = randomChar(' ', 128)
 
   def eKey(): Event[Char] =
     Event(IO.point { (Time.now, Reactive(randomChar, eKey())) }) // non FP here
