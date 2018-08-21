@@ -5,7 +5,6 @@ import scalaz.zio.IO
 
 object Future {
 
-  type Infallible[A] = IO[Void, A]
   type Future[+A]    = IO[Void, (Time, A)]
   def Never[A]: Future[A] = IO.never
 
