@@ -41,9 +41,12 @@ object Synthesizer extends App {
       .filter(_.isDefined) // TODO implement joinMaybes
       .map(_.get)
 
-    val bOctave: Behaviour[Octave] = Behaviour(Reactive(
+    val bOctave: Behaviour[Octave] = Behaviour(
+      Reactive(
         TimeFun.K(0), //
-        Event.accumE(0)(eOctChange).map( (x : Octave) => TimeFun.Fun(_ => x)) ))
+        Event.accumE(0)(eOctChange).map((x: Octave) => TimeFun.Fun(_ => x))
+      )
+    )
 
     val bPitch: Behaviour[Pitch] = Behaviour(
       Reactive(TimeFun.K(PA), ePitch.map(p => TimeFun.Fun(_ => p)))
