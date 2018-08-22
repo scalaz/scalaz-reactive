@@ -27,8 +27,8 @@ object Synthesizer extends App {
   def build(eKey: Event[Char]): Behaviour[Note] = {
     val ePitch: Event[Pitch] = eKey
       .map(table.get(_))
-      .filter(_.isDefined)
-      .map(_.get) // implement flatten, or filterSome
+      .filter(_.isDefined) // TODO implement joinMaybes
+      .map(_.get)
 
     val eOctChange: Event[Octave => Octave] = eKey
       .map { k =>
@@ -38,16 +38,13 @@ object Synthesizer extends App {
           case _   => None
         }
       }
-      .filter(_.isDefined)
+      .filter(_.isDefined) // TODO implement joinMaybes
       .map(_.get)
 
-    val bOctave: Behaviour[Octave] = Behaviour(
-      Reactive(
+    val bOctave: Behaviour[Octave] = Behaviour(Reactive(
         TimeFun.K(0), //
-        eOctChange
-          .map(f => TimeFun.Fun(_ => f(0))) // wrong, we need to fold eOctChange functions over initial value
-      )
-    )
+        Event.accumE(0)(eOctChange).map( (x : Octave) => TimeFun.Fun(_ => x)) ))
+
     val bPitch: Behaviour[Pitch] = Behaviour(
       Reactive(TimeFun.K(PA), ePitch.map(p => TimeFun.Fun(_ => p)))
     )
