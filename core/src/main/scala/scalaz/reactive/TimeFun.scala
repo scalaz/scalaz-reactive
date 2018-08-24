@@ -38,6 +38,7 @@ object TimeFun extends TimeFunFunctions with TimeFunInstances {
 
     def apply: Time => A = f
   }
+
 }
 
 trait TimeFunFunctions {

@@ -54,9 +54,7 @@ object Event {
   def accumR[A](a: A)(e: Event[A => A]): Reactive[A] = Reactive(a, accumE(a)(e))
 
   //  accumE :: a → Event (a → a) → Event a
-  def accumE[A](a: A)(e: Event[A => A]): Event[A] = {
-    def h(r: Reactive[A => A]): Reactive[A] = accumR(r.head(a))(r.tail)
-    Event(e.value.map { case (t, r) => (t, h(r)) })
-  }
+  def accumE[A](a: A)(e: Event[A => A]): Event[A] =
+    Event(e.value.map { case (t, r) => (t, accumR(r.head(a))(r.tail)) })
 
 }

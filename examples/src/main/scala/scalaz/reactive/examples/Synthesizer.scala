@@ -1,12 +1,15 @@
 package scalaz.reactive.examples
 
 import scalaz.Scalaz._
+import scalaz.reactive.Sink.Sink
 import scalaz.reactive._
-import scalaz.zio.{ App, IO }
+import scalaz.zio.{App, IO}
+
+import scala.io.StdIn
 
 /**
- * Example from https://wiki.haskell.org/FRP_explanation_using_reactive-banana
- */
+  * Example from https://wiki.haskell.org/FRP_explanation_using_reactive-banana
+  */
 object Synthesizer extends App {
 
   type Octave = Int
@@ -26,6 +29,9 @@ object Synthesizer extends App {
 
   def build(eKey: Event[Char]): Behaviour[Note] = {
     val ePitch: Event[Pitch] = eKey
+      .map { c =>
+        println("ePithcH"); c
+      }
       .map(table.get(_))
       .filter(_.isDefined) // TODO implement joinMaybes
       .map(_.get)
@@ -58,16 +64,29 @@ object Synthesizer extends App {
   def run(args: List[String]): IO[Nothing, ExitStatus] =
     myAppLogic.attempt.map(_.fold(_ => 1, _ => 0)).map(ExitStatus.ExitNow(_))
 
-  case class Tick(name: String)
+  def eKey(): Event[Char] = {
+    val nextChar: IO[Void, Char] = IO.sync {
+      val c = StdIn.readChar()
+      println(s"....$c...")
+      c
+    }
 
-  def randomChar(lower: Char, upper: Char) =
-    ((Math.random() * (upper - lower)).toInt + lower).toChar
-  def randomChar: Char = randomChar(' ', 128)
+    Event(nextChar.map { c => (Time.now, Reactive(c, eKey))
+    }) // non FP here
+  }
 
-  def eKey(): Event[Char] =
-    Event(IO.point { (Time.now, Reactive(randomChar, eKey())) }) // non FP here
+  def myAppLogic: IO[Void, Unit] = {
 
-  def myAppLogic: IO[Void, Unit] =
-    ???
+    val bNote: Behaviour[Note] = build(eKey())
+    val sink: Sink[Note] =
+      (n: Note) => IO.sync { println(s"note [${n.octave},${n.pitch}]") }
+
+    Sink.sinkB(
+      sink,
+      bNote,
+      (_: Sink[Note]) =>
+        (tn: TimeFun[Note]) => IO.sync { println(s".${tn.apply(Time.now)}") }
+    )
+  }
 
 }
