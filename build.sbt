@@ -9,7 +9,7 @@ lazy val commonSettings = Seq(
 
 val dependencies = Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.25",
-  "org.scalaz" %% "scalaz-zio"  % "0.1.0-0812841"
+  "org.scalaz" %% "scalaz-zio"  % "0.1-SNAPSHOT"
 )
 
 publishTo in ThisBuild := {
