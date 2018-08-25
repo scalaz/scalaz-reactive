@@ -8,9 +8,14 @@ lazy val commonSettings = Seq(
 )
 
 val dependencies = Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.25",
+  "org.scalaz" %% "scalaz-core" % "7.2.26",
   "org.scalaz" %% "scalaz-zio"  % "0.1-SNAPSHOT"
-)
+) ++
+  Seq(
+    "org.specs2" %% "specs2-core"          % "4.2.0" % Test,
+    "org.specs2" %% "specs2-scalacheck"    % "4.2.0" % Test,
+    "org.specs2" %% "specs2-matcher-extra" % "4.2.0" % Test
+  )
 
 publishTo in ThisBuild := {
   val nexus = "https://oss.sonatype.org/"
