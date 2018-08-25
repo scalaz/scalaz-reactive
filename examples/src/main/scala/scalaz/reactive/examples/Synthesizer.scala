@@ -1,64 +1,62 @@
 package scalaz.reactive.examples
 
-import scalaz.Scalaz._
-import scalaz.reactive.Sink.Sink
 import scalaz.reactive._
-import scalaz.zio.{App, IO}
+import scalaz.zio.{ App, IO }
 
 import scala.io.StdIn
 
 /**
-  * Example from https://wiki.haskell.org/FRP_explanation_using_reactive-banana
-  */
+ * Example from https://wiki.haskell.org/FRP_explanation_using_reactive-banana
+ */
 object Synthesizer extends App {
 
   type Octave = Int
 
-  sealed trait Pitch
-  object PA extends Pitch
-  object PB extends Pitch
-  object PC extends Pitch
-  object PD extends Pitch
-  object PE extends Pitch
-  object PF extends Pitch
-  object PG extends Pitch
+  case class Pitch(val sign: String)
+  object PA extends Pitch("a")
+  object PB extends Pitch("b")
+  object PC extends Pitch("c")
+  object PD extends Pitch("d")
+  object PE extends Pitch("e")
+  object PF extends Pitch("f")
+  object PG extends Pitch("g")
 
   case class Note(octave: Octave, pitch: Pitch)
 
-  val table = Map('a' -> PA, 'b' -> PB, 'g' -> PG)
+  val table =
+    Map('a' -> PA, 'b' -> PB, 'b' -> PB, 'c' -> PC, 'd' -> PD, 'e' -> PE, 'f' -> PF, 'g' -> PG)
 
-  def build(eKey: Event[Char]): Behaviour[Note] = {
-    val ePitch: Event[Pitch] = eKey
-      .map { c =>
-        println("ePithcH"); c
-      }
-      .map(table.get(_))
-      .filter(_.isDefined) // TODO implement joinMaybes
-      .map(_.get)
-
-    val eOctChange: Event[Octave => Octave] = eKey
-      .map { k =>
-        k match {
-          case '+' => Some((x: Octave) => x + 1)
-          case '-' => Some((x: Octave) => x - 1)
-          case _   => None
-        }
-      }
-      .filter(_.isDefined) // TODO implement joinMaybes
-      .map(_.get)
-
-    val bOctave: Behaviour[Octave] = Behaviour(
-      Reactive(
-        TimeFun.K(0), //
-        Event.accumE(0)(eOctChange).map((x: Octave) => TimeFun.Fun(_ => x))
-      )
+  def build(eKey: Event[Char]) = {
+    val ePitch: Event[Pitch] = Event.joinMaybes(
+      eKey.map(table.get(_))
     )
+
+//    val eOctChange: Event[Octave => Octave] = Event.joinMaybes(
+//      eKey
+//        .map { k =>
+//          k match {
+//            case '+' => Some((x: Octave) => x + 1)
+//            case '-' => Some((x: Octave) => x - 1)
+//            case _   => None
+//          }
+//        }
+//    )
+
+//    val bOctave: Behaviour[Octave] = Behaviour(
+//      Reactive(
+//        TimeFun.K(0),
+//        Event.accumE(0)(eOctChange).map((x: Octave) => TimeFun.K(x))
+//      )
+//    )
 
     val bPitch: Behaviour[Pitch] = Behaviour(
-      Reactive(TimeFun.K(PA), ePitch.map(p => TimeFun.Fun(_ => p)))
+      Reactive(TimeFun.K(PA), ePitch.map(p => TimeFun.K(p)))
     )
 
-    (bOctave |@| bPitch) { Note.apply _ }
+//    val bNote = (bOctave |@| bPitch) { Note.apply _ }
+
+    bPitch
+
   }
 
   def run(args: List[String]): IO[Nothing, ExitStatus] =
@@ -66,26 +64,22 @@ object Synthesizer extends App {
 
   def eKey(): Event[Char] = {
     val nextChar: IO[Void, Char] = IO.sync {
-      val c = StdIn.readChar()
-      println(s"....$c...")
-      c
+      println(s"Waiting for input")
+      StdIn.readChar()
     }
 
-    Event(nextChar.map { c => (Time.now, Reactive(c, eKey))
-    }) // non FP here
+    Event(nextChar.map { c =>
+      (Time.now, Reactive(c, eKey))
+    })
   }
 
   def myAppLogic: IO[Void, Unit] = {
 
-    val bNote: Behaviour[Note] = build(eKey())
-    val sink: Sink[Note] =
-      (n: Note) => IO.sync { println(s"note [${n.octave},${n.pitch}]") }
+    val toSink: Behaviour[Pitch] = build(eKey())
 
     Sink.sinkB(
-      sink,
-      bNote,
-      (_: Sink[Note]) =>
-        (tn: TimeFun[Note]) => IO.sync { println(s".${tn.apply(Time.now)}") }
+      toSink,
+      (tn: TimeFun[Pitch]) => IO.sync { println(s"Pitch is ${tn.apply(Time.now)}") }
     )
   }
 
