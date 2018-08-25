@@ -27,35 +27,35 @@ object Synthesizer extends App {
     Map('a' -> PA, 'b' -> PB, 'b' -> PB, 'c' -> PC, 'd' -> PD, 'e' -> PE, 'f' -> PF, 'g' -> PG)
 
   def build(eKey: Event[Char]) = {
-    val ePitch: Event[Pitch] = Event.joinMaybes(
-      eKey.map(table.get(_))
-    )
-
-//    val eOctChange: Event[Octave => Octave] = Event.joinMaybes(
-//      eKey
-//        .map { k =>
-//          k match {
-//            case '+' => Some((x: Octave) => x + 1)
-//            case '-' => Some((x: Octave) => x - 1)
-//            case _   => None
-//          }
-//        }
+//    val ePitch: Event[Pitch] = Event.joinMaybes(
+//      eKey.map(table.get(_))
 //    )
 
-//    val bOctave: Behaviour[Octave] = Behaviour(
-//      Reactive(
-//        TimeFun.K(0),
-//        Event.accumE(0)(eOctChange).map((x: Octave) => TimeFun.K(x))
-//      )
-//    )
-
-    val bPitch: Behaviour[Pitch] = Behaviour(
-      Reactive(TimeFun.K(PA), ePitch.map(p => TimeFun.K(p)))
+    val eOctChange: Event[Octave => Octave] = Event.joinMaybes(
+      eKey
+        .map { k =>
+          k match {
+            case '+' => Some((x: Octave) => x + 1)
+            case '-' => Some((x: Octave) => x - 1)
+            case _   => None
+          }
+        }
     )
+
+    val bOctave: Behaviour[Octave] = Behaviour(
+      Reactive(
+        TimeFun.K(0),
+        Event.accumE(0)(eOctChange).map((x: Octave) => TimeFun.K(x))
+      )
+    )
+
+//    val bPitch: Behaviour[Pitch] = Behaviour(
+//      Reactive(TimeFun.K(PA), ePitch.map(p => TimeFun.K(p)))
+//    )
 
 //    val bNote = (bOctave |@| bPitch) { Note.apply _ }
 
-    bPitch
+    bOctave
 
   }
 
@@ -75,11 +75,11 @@ object Synthesizer extends App {
 
   def myAppLogic: IO[Void, Unit] = {
 
-    val toSink: Behaviour[Pitch] = build(eKey())
+    val toSink: Behaviour[Octave] = build(eKey())
 
     Sink.sinkB(
       toSink,
-      (tn: TimeFun[Pitch]) => IO.sync { println(s"Pitch is ${tn.apply(Time.now)}") }
+      (tn: TimeFun[Octave]) => IO.sync { println(s"Octave is ${tn.apply(Time.now)}") }
     )
   }
 
