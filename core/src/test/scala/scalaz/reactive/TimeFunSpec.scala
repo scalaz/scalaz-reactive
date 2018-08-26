@@ -21,11 +21,6 @@ class TimeFunSpec extends Specification with ScalaCheck with TimeFunInstances {
   def aGen: Gen[Long] =
     Gen.choose(-100, 100)
 
-  def timeGen: Gen[T] =
-    for {
-      t <- aGen
-    } yield T(t)
-
   def faGen =
     for {
       v   <- aGen
