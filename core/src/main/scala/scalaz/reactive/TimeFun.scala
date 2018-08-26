@@ -1,11 +1,12 @@
 package scalaz.reactive
 
+import scalaz.reactive.Time._
 import scalaz.{ Applicative, Functor, Monad }
 import scalaz.reactive.TimeFun.{ Fun, K }
 
 sealed trait TimeFun[+A] {
 
-  def apply: Time => A
+  def apply: Time.T => A
 
   def map[B](f: A => B): TimeFun[B] =
     this match {
@@ -31,12 +32,12 @@ object TimeFun extends TimeFunFunctions with TimeFunInstances {
 
   case class K[+A](a: A) extends TimeFun[A] {
 
-    def apply: Time => A = _ => a
+    def apply: T => A = _ => a
   }
 
-  case class Fun[+A](f: Time => A) extends TimeFun[A] {
+  case class Fun[+A](f: T => A) extends TimeFun[A] {
 
-    def apply: Time => A = f
+    def apply: T => A = f
   }
 
 }
