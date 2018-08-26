@@ -2,7 +2,7 @@ package scalaz.reactive
 
 import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
-import org.specs2.{ScalaCheck, Specification}
+import org.specs2.{ ScalaCheck, Specification }
 import scalaz._
 import scalaz.reactive.Time.T
 import scalaz.reactive.TimeFun._
@@ -28,8 +28,8 @@ class TimeFunSpec extends Specification with ScalaCheck with TimeFunInstances {
 
   def faGen =
     for {
-      v <- aGen
-      k <- aGen
+      v   <- aGen
+      k   <- aGen
       fun <- Gen.oneOf(K(v), Fun(_.value * k * v))
     } yield fun
 
@@ -50,12 +50,13 @@ class TimeFunSpec extends Specification with ScalaCheck with TimeFunInstances {
     } yield (tf: TimeFun[Long]) => tf.apply(t)
 
   // TODO: extract this to a separate class
-  class ApplicativeLaws[F[_], A](applicative: Applicative[F],
-                                 aGen: Gen[A],
-                                 faGen: Gen[F[A]],
-                                 abGen: Gen[A => A],
-                                 fabGen: Gen[F[A => A]],
-                                 valueForEqGen: Gen[F[A] => A]) {
+  class ApplicativeLaws[F[_], A](
+    applicative: Applicative[F],
+    aGen: Gen[A],
+    faGen: Gen[F[A]],
+    abGen: Gen[A => A],
+    fabGen: Gen[F[A => A]],
+    valueForEqGen: Gen[F[A] => A]) {
 
     implicit class Equalable(v: F[A]) {
       def valueForEq(f: F[A] => A) = f(v)
