@@ -9,55 +9,47 @@ A high-performance, purely-functional library for reactive programming based on 
 
 # Introduction
 
-The FRP library that can be used to simplify applications that deal with values changing in time, both independently nd as result of external events. The library should be good
- to build an arcade game, a robot, or a monitoring and alerting application. Performance should be achieved by laziness and incremental computation.
- 
- - Push-pull model (does that cover incremental computation?)
- - Purely functional
- -
+This library aims at faithfully implementing Functional Reactive Programming as defined in [2].
+The term _Reactive programming_
+is often used to describe composing streams of discrete events. Functional reactive programming (FRP) is about
+composing dynamic values changing in continuous time and reacting to discrete events.
 
 # Core concepts
- 
 
-`Signal` - continous data changing with time. Time is continous, some discretization will occur when consumed at some moments in time. Example: the amount
-of water flowing out of a bucket with a constant rate will be `L = max(W0 - r * t, 0)`
-`Event` - values produced in time. Example: Add one liter of water.
-Signals may switched by events (e.g adding water will chnage the signal to `L = max(W0 + X - r * t, 0)`
-`Reactive values` change in time and are composed from signals and events going through a signal network.
+`Behaviour[A](value: Reactive[TimeFun[A]])` - value chaninging over time.
 
-# Design choices
+`Event[+A](value: Future[Reactive[A]])` - stream of (Time, a) pairs.
 
-Push (data driven) - all events propagated through the network - ineficient
-Pull (demand driven) -  values calculated when requested. May cause latency. May lead to duplicate calculations of data that ahs not changed.
-Push/pull - external events are pushed to all consumers so that eventual effect are processed.
+`Reactive[+A](head: A, tail: Event[A])` - reactive value.
 
-Arrowized FRP (like Yampa) : arrows as main mean to build flows - ???
-
-Interaction with the world: ZIO
-
-Scala.js and DOM manupulation are out of scope for this project.
-
-# Competition
-
-scala.rx
- - purely functional []
- - signals []
-
-Sodium
- - purely functional [x]
- - signals [x]
- 
-Monix
- - purely functional [x]
- - signals []
+`Sink[A, B](f: A => IO[Void, Unit])` - consumer of reactive values.
 
 
+# Example
+
+This project is just starting, so the working example is quite simple:
+
+```
+case class Tick(name: String)
+
+  def ticks(interval: Duration, name: String): Event[Tick] =
+    Event(IO.point { (Time.now, Reactive(Tick(name), ticks(interval, name).delay(interval))) })
+
+  def myAppLogic: IO[Void, Unit] =
+    Sink[Tick, Unit](t => IO.now(println(s"tick ${t.name}")))
+      .sink(
+        ticks(0.2 second, "a")
+          .merge(ticks(0.4 second, "b"))
+      )
+```
+
+This program produces a `scalaz.zio.IO` that can be run by e.g. `scalaz.zio.App` - see `TwoTickers.scala` in `examples`.
 
 # Background
+
 * _Functional Reactive Programming_ by Stephen Blackheath and Anthony Jones, Manning Publications
-* Conal Elliot's [Denotational Semantics](http://conal.net/papers/push-pull-frp/) paper
+* Push-Pull Functional Reactive Programming [paper](http://conal.net/papers/push-pull-frp/) by Conal Elliot
 * Haskell [Functional Reactive Programming](https://wiki.haskell.org/FRP)
 * [Overview](https://www.slant.co/topics/2349/~functional-reactive-programming-frp-libraries-for-haskell) of Haskell FRP libraries
 * [frp-zoo](https://github.com/gelisam/frp-zoo): Several implementation of a simple program with different FRP libraries
 * [Controlling time and space: understanding the many formulations of FRP](https://www.youtube.com/watch?v=Agu6jipKfYw) presentation based on ELM
-* A Scala FRP library [Sodium](https://github.com/SodiumFRP)
