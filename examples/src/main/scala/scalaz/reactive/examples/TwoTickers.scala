@@ -1,5 +1,6 @@
 package scalaz.reactive.examples
 
+import scalaz.reactive.Sink.Sink
 import scalaz.reactive._
 import scalaz.zio.{ App, IO }
 
@@ -14,13 +15,19 @@ object TwoTickers extends App {
   case class Tick(name: String)
 
   def ticks(interval: Duration, name: String): Event[Tick] =
-    Event(IO.point { (Time.now, Reactive(Tick(name), ticks(interval, name).delay(interval))) })
+    Event(IO.point {
+      (Time.now, Reactive(Tick(name), ticks(interval, name).delay(interval)))
+    })
 
-  def myAppLogic: IO[Void, Unit] =
-    Sink[Tick, Unit](t => IO.now(println(s"tick ${t.name}")))
-      .sink(
-        ticks(0.2 second, "a")
-          .merge(ticks(0.4 second, "b"))
-      )
+  def myAppLogic: IO[Void, Unit] = {
+    val sink: Sink[Tick] =
+      ((t: Tick) => IO.now(println(s"tick ${t.name}")))
+
+    Sink.sinkE(
+      sink,
+      ticks(0.2 second, "a")
+        .merge(ticks(0.4 second, "b"))
+    )
+  }
 
 }

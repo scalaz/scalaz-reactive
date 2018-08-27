@@ -39,6 +39,18 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
   def map[B](f: A => B): Event[B] =
     Event(value.map { case (t, r) => (t, r.map(f)) })
 
+  def flatMap[B](f: A => Event[B]): Event[B] = ???
+
+  def filter(f: A => Boolean): Event[A] =
+    Event(value.flatMap {
+      case (t, r) => {
+        if (f(r.head))
+          IO.point((t, Reactive(r.head, r.tail.filter(f))))
+        else
+          r.tail.filter(f).value
+      }
+    })
+
   implicit def monoidEvent[E, A]: Monoid[Event[A]] =
     new Monoid[Event[A]] {
 
@@ -48,4 +60,24 @@ case class Event[+A](value: Future[Reactive[A]]) { self =>
         e1.merge(e2)
     }
 
+}
+
+object Event {
+  // chapter 12
+  //accumR :: a → Event (a → a) → Reactive a
+  def accumR[A](a: A)(e: Event[A => A]): Reactive[A] = Reactive(a, accumE(a)(e))
+
+  //  accumE :: a → Event (a → a) → Event a
+  def accumE[A](a: A)(e: Event[A => A]): Event[A] =
+    Event(e.value.map { case (t, r) => (t, accumR(r.head(a))(r.tail)) })
+
+  def joinMaybes[A](e: Event[Option[A]]): Event[A] = {
+    val value: Future[Reactive[A]] = e.value.flatMap {
+      case (t, Reactive(Some(head), (tail: Event[Option[A]]))) =>
+        IO.point((t, Reactive(head, joinMaybes(tail))))
+      case (_, Reactive(None, (tail: Event[Option[A]]))) =>
+        joinMaybes(tail).value
+    }
+    Event(value)
+  }
 }
