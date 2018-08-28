@@ -9,16 +9,16 @@ import scalaz.reactive.Event
 import scalaz.reactive.Sink.Sink
 import scalaz.zio.{ IO, _ }
 
-object KeyboardAndTime extends App with RTS {
+object KeyboardAndTimeApp extends App with RTS {
 
   def run(args: List[String]): IO[Nothing, ExitStatus] =
     myAppLogic.attempt.map(_.fold(_ => 1, _ => 0)).map(ExitStatus.ExitNow(_))
 
   def myAppLogic =
-    AwtApp.run(new ThisDemo("AWT Events Demo"))
+    AwtApp.run(new KeyboardAndTimeApp("AWT Events Demo"))
 }
 
-class ThisDemo(name: String) extends AwtApp(name) {
+class KeyboardAndTimeApp(name: String) extends AwtApp(name) {
 
   setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
   val displayArea = new JTextArea
