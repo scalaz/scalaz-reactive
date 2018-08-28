@@ -46,22 +46,22 @@ abstract class AwtApp(val name: String)
   private val actionQueue = new LinkedBlockingDeque[ActionEvent]()
 
   private def keyEvent: Event[KeyEvent] =
-    Event(
-      IO.point(keyQueue.take())
-        .map(ke => (Time.now, Reactive(ke, keyEvent)))
-    )
+    Event(for {
+      t <- Time.now
+      e <- IO.sync(keyQueue.take())
+    } yield (t, Reactive(e, keyEvent)))
 
   private def mouseEvent: Event[MouseEvent] =
-    Event(
-      IO.point(mouseQueue.take())
-        .map(ke => (Time.now, Reactive(ke, mouseEvent)))
-    )
+    Event(for {
+      t <- Time.now
+      e <- IO.sync(mouseQueue.take())
+    } yield (t, Reactive(e, mouseEvent)))
 
   private def actionEvent: Event[ActionEvent] =
-    Event(
-      IO.point(actionQueue.take())
-        .map(ke => (Time.now, Reactive(ke, actionEvent)))
-    )
+    Event(for {
+      t <- Time.now
+      e <- IO.sync(actionQueue.take())
+    } yield (t, Reactive(e, actionEvent)))
 
   private val allEvent = mouseEvent.merge(keyEvent).merge(actionEvent)
 
