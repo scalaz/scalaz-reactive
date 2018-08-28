@@ -3,6 +3,7 @@ package scalaz.reactive
 import scalaz.Order
 import scalaz.Ordering.{ EQ, GT, LT }
 import scalaz.reactive.Time.{ NegInf, PosInf, T }
+import scalaz.zio.IO
 
 sealed trait Time
 
@@ -14,7 +15,7 @@ object Time extends TimeInstances0 {
 
   case object PosInf extends Time
 
-  def now = T(System.currentTimeMillis())
+  def now = IO.sync(T(System.currentTimeMillis()))
 }
 
 trait TimeInstances0 {

@@ -24,7 +24,16 @@ object Synthesizer extends App {
   case class Note(octave: Octave, pitch: Pitch)
 
   val table =
-    Map('a' -> PA, 'b' -> PB, 'b' -> PB, 'c' -> PC, 'd' -> PD, 'e' -> PE, 'f' -> PF, 'g' -> PG)
+    Map(
+      'a' -> PA,
+      'b' -> PB,
+      'b' -> PB,
+      'c' -> PC,
+      'd' -> PD,
+      'e' -> PE,
+      'f' -> PF,
+      'g' -> PG
+    )
 
   def build(eKey: Event[Char]) = {
 //    val ePitch: Event[Pitch] = Event.joinMaybes(
@@ -68,8 +77,8 @@ object Synthesizer extends App {
       StdIn.readChar()
     }
 
-    Event(nextChar.map { c =>
-      (Time.now, Reactive(c, eKey))
+    Event(nextChar.flatMap { c =>
+      Time.now.map((_, Reactive(c, eKey)))
     })
   }
 
@@ -79,7 +88,10 @@ object Synthesizer extends App {
 
     Sink.sinkB(
       toSink,
-      (tn: TimeFun[Octave]) => IO.sync { println(s"Octave is ${tn.apply(Time.now)}") }
+      (tn: TimeFun[Octave]) =>
+        Time.now.map { t =>
+          println(s"Octave is ${tn.apply(t)}")
+        }
     )
   }
 
