@@ -2,21 +2,20 @@
 
 [![Gitter](https://badges.gitter.im/scalaz/scalaz-reactive.svg)](https://gitter.im/scalaz/scalaz-reactive?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-
-# Goal
+## Goal
 
 A high-performance, purely-functional library for reactive programming based on efficient incremental computation.
 
-# Introduction
+## Introduction
 
 This library aims at faithfully implementing Functional Reactive Programming as defined in [2].
 The term _Reactive programming_
 is often used to describe composing streams of discrete events. Functional reactive programming (FRP) is about
 composing dynamic values changing in continuous time and reacting to discrete events.
 
-# Core concepts
+## Core concepts
 
-`Behaviour[A](value: Reactive[TimeFun[A]])` - value chaninging over time.
+`Behaviour[A](value: Reactive[TimeFun[A]])` - value changing over time.
 
 `Event[+A](value: Future[Reactive[A]])` - stream of (Time, a) pairs.
 
@@ -24,12 +23,11 @@ composing dynamic values changing in continuous time and reacting to discrete ev
 
 `Sink[A, B](f: A => IO[Void, Unit])` - consumer of reactive values.
 
-
-# Example
+## Example
 
 This project is just starting, so the working example is quite simple:
 
-```
+```scala
 case class Tick(name: String)
 
   def ticks(interval: Duration, name: String): Event[Tick] =
@@ -45,7 +43,7 @@ case class Tick(name: String)
 
 This program produces a `scalaz.zio.IO` that can be run by e.g. `scalaz.zio.App` - see `TwoTickers.scala` in `examples`.
 
-# Background
+## Background
 
 * _Functional Reactive Programming_ by Stephen Blackheath and Anthony Jones, Manning Publications
 * Push-Pull Functional Reactive Programming [paper](http://conal.net/papers/push-pull-frp/) by Conal Elliot
