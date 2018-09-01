@@ -6,12 +6,12 @@ import scalaz.zio.{ Fiber, IO }
 import scala.concurrent.duration.Duration
 
 /**
- * Semantically, an Event is time-ordered lists of future values, where a future value 
- * is a time/value pair: [(t0 , a0 ), (t1 , a1 ), ...]. If such an occurrence list is 
- * nonempty, another view on it is as a time t0, together with a reactive value having 
- * initial value a0 and event with occurrences [(t1,a1),...]. If the occurrence list is 
+ * Semantically, an Event is time-ordered lists of future values, where a future value
+ * is a time/value pair: [(t0 , a0 ), (t1 , a1 ), ...]. If such an occurrence list is
+ * nonempty, another view on it is as a time t0, together with a reactive value having
+ * initial value a0 and event with occurrences [(t1,a1),...]. If the occurrence list is
  * empty, then we could consider it to have initial time ∞ (maxBound), and reactive value
- * of ⊥. Since a future value is a time and value, it follows that an event (empty or nonempty) 
+ * of ⊥. Since a future value is a time and value, it follows that an event (empty or nonempty)
  * has the same content as a future reactive value (Push-Pull FRP section 6).
  */
 case class Event[+A](value: Future[Reactive[A]]) { self =>

@@ -3,9 +3,9 @@ package scalaz.reactive
 import scalaz.{ Applicative, Functor }
 
 /**
- * Semantically, a behaviour is simply a function of time.  A reactive behaviour is composed 
- * of a discrete part, represented as a reactive value, `Reactive`, and a continuous 
- * part, represented as a time function,`TimeFun`.  
+ * Semantically, a behaviour is simply a function of time.  A reactive behaviour is composed
+ * of a discrete part, represented as a reactive value, `Reactive`, and a continuous
+ * part, represented as a time function,`TimeFun`.
  */
 case class Behaviour[A](value: Reactive[TimeFun[A]]) extends AnyVal {
 

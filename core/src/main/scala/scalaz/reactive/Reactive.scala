@@ -3,7 +3,7 @@ package scalaz.reactive
 import scalaz.{ Applicative, Functor, Monad }
 import Future._
 
-/** 
+/**
  * A reactive value is like a reactive behaviour but is restricted to changing discretely. Its
  * meaning is a step function defined by an initial value, `head`, and discrete changes, `tail`.
  * Each discrete change is defined by a time and a value, which correspond exactly to an FRP `Event`.
