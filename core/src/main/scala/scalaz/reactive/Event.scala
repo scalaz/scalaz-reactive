@@ -12,7 +12,15 @@ import scala.concurrent.duration.Duration
  * initial value a0 and event with occurrences [(t1,a1),...]. If the occurrence list is
  * empty, then we could consider it to have initial time ∞ (maxBound), and reactive value
  * of ⊥. Since a future value is a time and value, it follows that an event (empty or nonempty)
- * has the same content as a future reactive value (Push-Pull FRP section 6).
+ * has the same content as a future reactive value. This insight leads to a new representation
+ * of functional events:
+ *
+ * {{{
+ * -- for non-decreasing times
+ * newtype Event a = Ev (Future (Reactive a))
+ * }}}
+ *
+ * See more details in section 6 at http://conal.net/papers/push-pull-frp
  */
 case class Event[+A](value: Future[Reactive[A]]) { self =>
   def delay(interval: Duration): Event[A] = Event(value.delay(interval))
