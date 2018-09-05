@@ -4,7 +4,7 @@ import java.awt.event._
 import java.awt.{ BorderLayout, Dimension }
 import java.util.EventObject
 
-import javax.swing.{ JButton, JScrollPane, JTextArea, _ }
+import javax.swing.{ JButton, JScrollPane, JTextArea, WindowConstants }
 import scalaz.reactive.Event
 import scalaz.reactive.Sink.Sink
 import scalaz.zio.{ IO, _ }
@@ -20,7 +20,7 @@ object KeyboardAndTimeApp extends App with RTS {
 
 class KeyboardAndTimeApp(name: String) extends AwtApp(name) {
 
-  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+  setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
   val displayArea = new JTextArea
   buildPane()
 

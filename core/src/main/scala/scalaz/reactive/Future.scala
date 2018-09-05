@@ -3,6 +3,9 @@ package scalaz.reactive
 import scalaz.Scalaz._
 import scalaz.zio.IO
 
+/**
+ * A value with an associated time, `(t,a)`
+ */
 object Future {
 
   type Future[+A] = IO[Void, (Time, A)]

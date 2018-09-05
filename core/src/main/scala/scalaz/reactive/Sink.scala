@@ -1,6 +1,9 @@
 package scalaz.reactive
 import scalaz.zio.IO
 
+/**
+ * A consumer for the generated values.
+ */
 object Sink {
 
   type Sink[A] = A => IO[Void, Unit]

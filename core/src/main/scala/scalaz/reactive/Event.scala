@@ -5,6 +5,23 @@ import scalaz.zio.{ Fiber, IO }
 
 import scala.concurrent.duration.Duration
 
+/**
+ * Semantically, an Event is time-ordered lists of future values, where a future value
+ * is a time/value pair: [(t0 , a0 ), (t1 , a1 ), ...]. If such an occurrence list is
+ * nonempty, another view on it is as a time t0, together with a reactive value having
+ * initial value a0 and event with occurrences [(t1,a1),...]. If the occurrence list is
+ * empty, then we could consider it to have initial time ∞ (maxBound), and reactive value
+ * of ⊥. Since a future value is a time and value, it follows that an event (empty or nonempty)
+ * has the same content as a future reactive value. This insight leads to a new representation
+ * of functional events:
+ *
+ * {{{
+ * -- for non-decreasing times
+ * newtype Event a = Ev (Future (Reactive a))
+ * }}}
+ *
+ * See more details in section 6 at http://conal.net/papers/push-pull-frp
+ */
 case class Event[+A](value: Future[Reactive[A]]) { self =>
   def delay(interval: Duration): Event[A] = Event(value.delay(interval))
 

@@ -4,6 +4,9 @@ import scalaz.reactive.Time._
 import scalaz.{ Applicative, Functor, Monad }
 import scalaz.reactive.TimeFun.{ Fun, K }
 
+/**
+ * A function of time.  It has functor, applicative, and monad instances
+ */
 sealed trait TimeFun[+A] {
 
   def apply: Time.T => A
