@@ -13,10 +13,11 @@ class ReactiveSpec
     with ScalaCheck
     with ReactiveInstances {
 
+  // laws.apIdentityLaw fails, without ever reaching Reactive.ap function
+
   def is = "ReactiveInstances".title ^ s2"""
    Generate a mix of K and Fun TimeFuns
       `Reactive.ap` holds identity law. ${laws.apIdentityLaw}
-
     """
 
   def aGen: Gen[A] =
