@@ -20,7 +20,7 @@ object KeyboardAndTimeApp extends App with RTS {
 
 class KeyboardAndTimeApp(name: String) extends AwtApp(name) {
 
-  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+  setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
   val displayArea = new JTextArea
   buildPane()
 

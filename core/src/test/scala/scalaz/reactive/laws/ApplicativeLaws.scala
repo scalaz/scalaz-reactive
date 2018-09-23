@@ -1,30 +1,36 @@
 package scalaz.reactive.laws
-import org.scalacheck.{ Gen, Prop }
+import org.scalacheck.{Gen, Prop}
 import org.scalacheck.Prop.forAll
-import org.specs2.matcher.{ MatchResult, MustMatchers }
+import org.specs2.matcher.{MatchResult, MustMatchers}
 import scalaz.Applicative
 
-class ApplicativeLaws[F[_], A](
-  applicative: Applicative[F],
-  aGen: Gen[A],
-  faGen: Gen[F[A]],
-  abGen: Gen[A => A],
-  fabGen: Gen[F[A => A]],
-  valueForEqGen: Gen[F[A] => A]
-)(implicit
-  pa: MatchResult[A] => Prop,
-  pfa: MatchResult[F[A]] => Prop)
-    extends MustMatchers {
+/**
+  * To run property based testson the Applictive laws on F[_]
+  *
+  * @param applicative
+  *
+  */
+class ApplicativeLaws[F[_], A, B](applicative: => Applicative[F],
+                                  aGen: => Gen[A],
+                                  faGen: => Gen[F[A]],
+                                  abGen: => Gen[A => A],
+                                  fabGen: => Gen[F[A => A]],
+                                  fComp: => F[A] => B)(
+  implicit
+  pfa: MatchResult[F[A]] => Prop,
+  pb: MatchResult[B] => Prop
+) extends MustMatchers {
 
-  implicit class Equalable(v: F[A]) {
-    def valueForEq(f: F[A] => A) = f(v)
+  implicit class ExtractValueForEq(v: F[A]) {
+    def valueForEq: B = fComp(v)
   }
 
-  // ap(fa)(point(_)) == fa
-  def apIdentityLaw = forAll(faGen, valueForEqGen) { (fa, v) =>
-    applicative
-      .ap(fa)(applicative.point(identity[A](_)))
-      .valueForEq(v) must beEqualTo(fa.valueForEq(v))
+  // Identity law: ap(fa)(point(_)) == fa
+  def apIdentityLaw = forAll(faGen) { fa =>
+    println(s"Checking identity of $fa")
+    val right: B = fa.valueForEq
+    val left: B = applicative.ap(fa)(applicative.point(identity[A](_))).valueForEq
+    left must beEqualTo(right)
   }
 
   // ap(point(a))(point(ab)) == point(ab(a))
@@ -43,8 +49,8 @@ class ApplicativeLaws[F[_], A](
   }
 
   //map(fa)(ab) == ap(fa)(point(ab))
-  def apDerivedMapLaw = forAll(faGen, abGen, valueForEqGen) { (fa, ab, v) =>
-    applicative.map(fa)(ab).valueForEq(v) must
-      beEqualTo(applicative.ap(fa)(applicative.point(ab)).valueForEq(v))
+  def apDerivedMapLaw = forAll(faGen, abGen) { (fa, ab) =>
+    applicative.map(fa)(ab).valueForEq must
+      beEqualTo(applicative.ap(fa)(applicative.point(ab)).valueForEq)
   }
 }

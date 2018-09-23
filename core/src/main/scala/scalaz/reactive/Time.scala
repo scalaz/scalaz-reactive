@@ -15,7 +15,7 @@ object Time extends TimeInstances0 {
 
   case object PosInf extends Time
 
-  def now = IO.sync(T(System.currentTimeMillis()))
+  def now: IO[Void, T] = IO.sync(T(System.currentTimeMillis()))
 }
 
 trait TimeInstances0 {
