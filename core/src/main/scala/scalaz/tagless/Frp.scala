@@ -1,19 +1,25 @@
 package scalaz.tagless
 import scalaz.reactive.Time
+import scalaz.tagless.Frp.Future
 
 import scala.concurrent.duration.Duration
 
+object Frp {
+  type Future[F[_], A] = F[(Time, A)]
+}
+
 case class Reactive[F[_], A](head: A, tail: Event[F, A])
 
-case class Event[F[_], A](value: F[Reactive[F, A]])
+case class Event[F[_], A](value: Future[F, Reactive[F, A]])
 
 case class Behaviour[A]()
+
 
 trait Frp[F[_]] {
 
   type Sink[A] = A => F[Unit]
 
-  def merge[A](a: => F[A], b: F[A]): F[A]
+  def merge[A](a: => Future[F, A], b: Future[F, A]): Future[F, A]
 
   def merge[A](a: => Event[F, A], b: Event[F, A]): F[Event[F, A]]
 
@@ -29,8 +35,8 @@ trait Frp[F[_]] {
 
   def never[A]: Event[F, A]
 
-}
 
+}
 
 object Ops {
 
@@ -41,6 +47,3 @@ object Ops {
   }
 
 }
-
-
-

@@ -1,7 +1,7 @@
 package scalaz.tagless
 
 import scalaz._
-
+import scalaz.tagless.Frp.Future
 
 object instances {
 
@@ -12,11 +12,11 @@ object instances {
     new Monad[R] {
       override def bind[A, B](fa: R[A])(f: A => R[B]): R[B] = {
         val other: Reactive[F, B] = f(fa.head)
-        val otherTail: F[Reactive[F, B]] = other.tail.value
-        val thisTail: F[Reactive[F, B]] = monad.bind(fa.tail.value) { r =>
-          f(r.head).tail.value
+        val otherTail: Future[F, Reactive[F, B]] = other.tail.value
+        val thisTail: Future[F, Reactive[F, B]] = monad.bind(fa.tail.value) {
+          case (_, r) => f(r.head).tail.value
         }
-        val merged: F[Reactive[F, B]] = frp.merge(thisTail, otherTail)
+        val merged: Future[F, Reactive[F, B]] = frp.merge(thisTail, otherTail)
         Reactive(other.head, Event(merged))
       }
 
@@ -26,5 +26,3 @@ object instances {
   }
 
 }
-
-

@@ -1,6 +1,7 @@
 package scalaz.tagless
 import scalaz.Monad
 import scalaz.Scalaz._
+import scalaz.tagless.Frp.Future
 import scalaz.tagless.types.IO1
 import scalaz.zio.{App, IO}
 
@@ -24,8 +25,9 @@ object TwoTickers1 extends App {
         head <- m.point(Tick(name))
         tail <- tail()
       } yield Reactive(head, tail)
-      val e: Event[F, Tick] = Event(x)
-      m.point(e)
+      val z: Future[F, Reactive[F, Tick]] =
+        frp.now.flatMap(t => x.map(r => (t, r)))
+      m.point(Event(z))
     }
 
     def myAppLogic: F[Unit] = {

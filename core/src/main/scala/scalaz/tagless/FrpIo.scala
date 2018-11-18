@@ -1,6 +1,9 @@
 package scalaz.tagless
 import scalaz.Monad
+import scalaz.Scalaz._
 import scalaz.reactive.Time
+import scalaz.reactive.Time._
+import scalaz.tagless.Frp.Future
 import scalaz.tagless.types.IO1
 import scalaz.zio.{Fiber, IO}
 
@@ -13,29 +16,30 @@ package object types {
 
 object FrpIo extends Frp[IO1] {
 
-  override def merge[A](f1: => IO1[A], f2: IO1[A]): IO1[A] = {
-    f1.flatMap { _ => // FIXME : we need to compare the times
-      f2.map { a2 => a2
-      }
+  override def merge[A](f1: => Future[IO1, A],
+                        f2: Future[IO1, A]): Future[IO1, A] =
+    f1.flatMap {
+      case (t1, a1) =>
+        f2.map { case (t2, a2) => if (t1 <= t2) (t1, a1) else (t2, a2) }
     }
-  }
 
   override def merge[A](a: => Event[IO1, A],
                         b: Event[IO1, A]): IO1[Event[IO1, A]] = {
 
-    case class Outcome(value: Reactive[IO1, A],
-                       loser: Fiber[Void, Reactive[IO1, A]])
+    case class Outcome(value: (Time, Reactive[IO1, A]),
+                       loser: Fiber[Void, (Time, Reactive[IO1, A])])
 
-    val futureReactive: IO1[Reactive[IO1, A]] = a.value
+    val futureReactive: IO1[(Time, Reactive[IO1, A])] = a.value
       .raceWith(b.value)(
         (a, f) => IO.now(Outcome(a, f)),
         (a, f) => IO.now(Outcome(a, f))
       )
       .flatMap {
         case Outcome(reactive, loser) =>
-          val winTail: Event[IO1, A] = reactive.tail
-          val j: IO1[Reactive[IO1, A]] = loser.join
-          merge(winTail, Event(j)).map(m => Reactive(reactive.head, m))
+          val winTail: Event[IO1, A] = reactive._2.tail
+          val j: Future[IO1, Reactive[IO1, A]] = loser.join
+          merge(winTail, Event(j))
+            .map(m => (reactive._1, Reactive(reactive._2.head, m)))
       }
     monadIo.pure(Event(futureReactive))
 
@@ -44,23 +48,20 @@ object FrpIo extends Frp[IO1] {
   def delay[A](e: => Event[IO1, A], interval: Duration): IO1[Event[IO1, A]] =
     IO.sync(e).delay(interval)
 
-  override def now: IO1[Time] = {
-    println("now")
-    ???
-  }
+  override def now: IO1[Time] = IO.sync(T(System.currentTimeMillis()))
+
   override def pure[A](a: => A): IO1[A] = IO.now(a)
 
   override def sinkR[A](sink: Sink[A], r: Reactive[IO1, A]): IO1[Unit] =
     sink(r.head).flatMap(_ => sinkE(sink, r.tail))
 
   override def sinkE[A](sink: Sink[A], e: Event[IO1, A]): IO1[Unit] =
-    e.value.flatMap { r => sinkR(sink, r)
+    e.value.flatMap { r => sinkR(sink, r._2)
     }
 
-  override def never[A]: Event[IO1, A] = {
-    println("never")
-    ???
-  }
+  def Never[A]: Future[IO1, A] = IO.never
+
+  override def never[A]: Event[IO1, A] = Event(Never)
 }
 
 object monadIo extends Monad[IO1] {
