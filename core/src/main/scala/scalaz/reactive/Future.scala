@@ -1,15 +1,19 @@
 package scalaz.reactive
 
-import scalaz.Scalaz._
-import scalaz.zio.IO
+import scalaz.{Monad, Monoid}
 
-object Future {
+trait FutureInstances {
 
-  type Future[+A] = IO[Void, (Time, A)]
-  def Never[A]: Future[A] = IO.never
+  implicit def monoidFuture[F[_]: Sync, A] = new Monoid[Future[F, A]] {
 
-  def merge[A](f1: Future[A], f2: Future[A]): Future[A] = f1.flatMap {
-    case (t1, a1) =>
-      f2.map { case (t2, a2) => if (t1 <= t2) (t1, a1) else (t2, a2) }
+
+    lazy val noVal: F[A] = Sync[F].suspend { println("Instantiating a"); ??? }
+    lazy val never: F[Time] = Monad[F].pure(Time.PosInf)
+
+    override def zero: Future[F, A] =
+      Future(never, noVal)
+    override def append(f1: Future[F, A], f2: => Future[F, A]): Future[F, A] =
+      ???
   }
+
 }

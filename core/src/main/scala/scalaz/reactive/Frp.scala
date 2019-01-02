@@ -1,11 +1,29 @@
-package scalaz.tagless
-import scalaz.reactive.Time
-import scalaz.tagless.Frp.Future
+package scalaz.reactive
+
+import scalaz.Monad
 
 import scala.concurrent.duration.Duration
 
+trait Sync[F[_]] extends Monad[F] {
+  def suspend[A](thunk: => F[A]): F[A]
+  def delay[A](thunk: => A): F[A] = suspend(pure(thunk))
+}
+
+object Sync {
+  @inline def apply[F[_]](implicit F: Sync[F]): Sync[F] = F
+}
+
 object Frp {
-  type Future[F[_], A] = F[(Time, A)]
+  type FTime = Unit => Time
+}
+
+case class Future[F[_]: Sync, A](t: F[Time], v: F[A])
+
+object Future {
+  def apply[F[_]: Sync, A](t: Time, v: A): Future[F, A] =
+    Future(Monad[F].pure(t), Monad[F].pure(v))
+
+  //  def apply[F[_]: Monad, A](ft: Time, v: F[A]): Future[F, A] = Future(Monad[F].pure(t), v)
 }
 
 case class Reactive[F[_], A](head: A, tail: Event[F, A])
@@ -13,7 +31,6 @@ case class Reactive[F[_], A](head: A, tail: Event[F, A])
 case class Event[F[_], A](value: Future[F, Reactive[F, A]])
 
 case class Behaviour[A]()
-
 
 trait Frp[F[_]] {
 
@@ -34,7 +51,6 @@ trait Frp[F[_]] {
   def sinkR[A](sink: Sink[A], r: Reactive[F, A]): F[Unit]
 
   def never[A]: Event[F, A]
-
 
 }
 

@@ -1,8 +1,10 @@
-package scalaz.tagless
+package scalaz.reactive.examples
+
 import scalaz.Monad
 import scalaz.Scalaz._
-import scalaz.tagless.Frp.Future
-import scalaz.tagless.types.IO1
+import scalaz.reactive.io.types.IO1
+import scalaz.reactive._
+import scalaz.reactive.io.FrpIo
 import scalaz.zio.{App, IO}
 
 import scala.concurrent.duration.{Duration, _}
@@ -10,11 +12,12 @@ import scala.language.postfixOps
 
 object TwoTickers1 extends App {
 
-  import Ops._
+  import scalaz.reactive.Ops._
+  import scalaz.reactive.io.instances._
 
   case class Tick(name: String)
 
-  class Program[F[_]](implicit val frp: Frp[F], m: Monad[F]) {
+  class Program[F[_]](implicit val frp: Frp[F], m: Sync[F]) {
 
     def ticks(interval: Duration, name: String): F[Event[F, Tick]] = {
 
@@ -25,9 +28,10 @@ object TwoTickers1 extends App {
         head <- m.point(Tick(name))
         tail <- tail()
       } yield Reactive(head, tail)
-      val z: Future[F, Reactive[F, Tick]] =
-        frp.now.flatMap(t => x.map(r => (t, r)))
-      m.point(Event(z))
+      val fut: Future[F, Reactive[F, Tick]] = Future(frp.now, x)
+
+      val e: Event[F, Tick] = Event(fut)
+      Monad[F].pure(e)
     }
 
     def myAppLogic: F[Unit] = {
