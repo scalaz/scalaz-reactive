@@ -1,19 +1,17 @@
 package scalaz.reactive
 
-import scalaz.{Monad, Monoid}
+import scalaz._
+import scalaz.Scalaz._
 
 trait FutureInstances {
 
-  implicit def monoidFuture[F[_]: Sync, A] = new Monoid[Future[F, A]] {
+  val monEither = implicitly[Functor[Either[Int, ?]]]
+  val monOpt: Functor[Option] = implicitly[Functor[Option]]
 
+  def mapFuture[F[_]: Sync, ?] = new Functor[Future[F, ?]] {
+    override def map[A, B](fa: Future[F, A])(f: A => B): Future[F, B] =
+      Future(fa.ftv.map(tv => TimedValue(tv.t, _ => f(tv.get))))
 
-    lazy val noVal: F[A] = Sync[F].suspend { println("Instantiating a"); ??? }
-    lazy val never: F[Time] = Monad[F].pure(Time.PosInf)
-
-    override def zero: Future[F, A] =
-      Future(never, noVal)
-    override def append(f1: Future[F, A], f2: => Future[F, A]): Future[F, A] =
-      ???
   }
 
 }

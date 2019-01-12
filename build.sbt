@@ -4,7 +4,8 @@ lazy val commonSettings = Seq(
   organization := "org.scalaz",
   version := "0.1.0-SNAPSHOT",
   resolvers +=
-    "Sonatype OSS Snapshots".at("https://oss.sonatype.org/content/repositories/snapshots")
+    "Sonatype OSS Snapshots".at("https://oss.sonatype.org/content/repositories/snapshots"),
+  parallelExecution in Test := false
 )
 
 val dependencies = Seq(
