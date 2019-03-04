@@ -1,5 +1,7 @@
 import Scalaz._
 
+enablePlugins(MicrositesPlugin)
+
 lazy val commonSettings = Seq(
   organization := "org.scalaz",
   version := "0.1.0-SNAPSHOT",
