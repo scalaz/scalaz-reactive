@@ -1,6 +1,8 @@
 import Scalaz._
 
 enablePlugins(MicrositesPlugin)
+micrositeName := "Scalaz Reactive"
+micrositeDescription := "A high-performance, purely-functional library for reactive programming based on efficient incremental computation."
 
 lazy val commonSettings = Seq(
   organization := "org.scalaz",
